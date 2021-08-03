@@ -153,10 +153,10 @@ FR MAPS
 
 #FR_maps
 
-path_to_mask=/autofs/space/alicudi_002/users/mscat/users/celine/lesion_mask
-path_to_FR_maps=/autofs/cluster/mscat/users/michael/FR_maps
-path_to_lobe=/autofs/cluster/mscat/users/michael/maps_nifti
-path_to_output=/autofs/cluster/mscat/users/michael/lobes
+path_to_mask=[path to mask]
+path_to_FR_maps=[path to FR maps]
+path_to_lobe=[path to lobe segmentation]
+path_to_output=[path to output]
 
 echo '#' > $path_to_output/frontal.csv
 echo '#' > $path_to_output/occipital.csv
@@ -164,9 +164,7 @@ echo '#' > $path_to_output/temporal.csv
 echo '#' > $path_to_output/parietal.csv
 echo '#' > $path_to_output/unsegmented_WM.csv
 
-for subj in DODMS10R_MS094_R01_25 MS73_R01_05 MS74_R01_06 MS76_R01_08 MS78_R01_10 MS80_R01_12 MS81_R01_13 MS084_R01_16_DODMS07 MS88_R01_20 MS89_R01_29 MS095_R01_26_DODMS12 MS069_R01_01_DODMS03_2 MS087_R01_19_DODMS17_2 MS079_R01_11 MS82_R01_14 MS86_R01_18 MS72_R01_04; do
-
-#DODMS10R_MS094_R01_25 MS73_R01_05 MS74_R01_06 MS76_R01_08 MS78_R01_10 MS80_R01_12 MS81_R01_13 MS084_R01_16_DODMS07 MS88_R01_20 MS89_R01_29 MS095_R01_26_DODMS12
+for subj in [list of subjects]; do
 
 echo $subj 
 
@@ -211,13 +209,13 @@ UNSEGMENTED WHITE MATTER
 
 #!/bin/bash
 
-path_to_recon=/autofs/cluster/mscat/users/caterina/recons_fsv5.3/
-path_to_mask=/autofs/space/alicudi_002/users/mscat/users/celine/lesion_mask
-path_to_output=/autofs/cluster/mscat/users/michael
+path_to_recon=[path to recon]
+path_to_mask=[path to lesion mask]
+path_to_output=[path to output]
 
 echo '#' > $path_to_output/unsegmented_WM.csv
 
-for subj in MS90_R01_21 MS92_R01_23 MS96_R01_27 MS98_R01_30 MS102_R01_34 MS104_R01_36 MSPET05 MS_UHF_006 MS_UHF_018 MS_UHF_023 MS_UHF_024 MS_UHF_025 MS_UHF_028 MS_UHF_030 MS_UHF_033 NIMMS03 NIMMS05 NIMMS06 NIMMS07 NIMMS08 NIMMS10; do
+for subj in [list of subjects]; do
 
 echo $subj 
 
