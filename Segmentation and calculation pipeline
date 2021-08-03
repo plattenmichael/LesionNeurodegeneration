@@ -1,0 +1,282 @@
+LOBES
+
+#!/bin/bash
+
+path_to_recon=[path to FreeSurfer recons]
+path_to_mask=[path to lesions masks]
+path_to_output=[path to output]
+
+echo '#' > $path_to_output/frontal.csv
+echo '#' > $path_to_output/occipital.csv
+echo '#' > $path_to_output/temporal.csv
+echo '#' > $path_to_output/parietal.csv
+
+for subj in [Subjects analyzed in list form]; do
+
+echo $subj 
+
+for lobe in frontal occipital temporal parietal;do
+
+echo $subj >> $path_to_output/$lobe".csv"
+
+
+done
+
+mkdir $path_to_output/$subj
+
+
+#To get lobes for white matter segmentation
+
+mri_annotation2label --subject $subj --hemi lh --lobesStrict lobes
+mri_annotation2label --subject $subj --hemi rh --lobesStrict lobes
+
+#To get the white matter segmentations from the above lobes
+
+mri_aparc2aseg --s $subj --labelwm --hypo-as-wm --rip-unknown --volmask --o $path_to_output/$subj/wmparc.lobes.mgz --ctxseg aparc+aseg.mgz --annot lobes --base-offset 200
+
+#mri_aparc2aseg --s $subj --labelwm --hypo-as-wm --rip-unknown --volmask --o $path_to_output/$subj/wmparc.lobes.mgz --ctxseg aparc+aseg.mgz --annot lobes 
+
+
+#To binarize the lobes with values 340-347
+
+mri_binarize --i $path_to_output/$subj/wmparc.lobes.mgz --o $path_to_output/$subj/white_matter_lobes.mgz --replace 3201 340 --replace 3204 341 --replace 3205 342 --replace 3206 343 --replace 4201 344 --replace 4204 345 --replace 4205 346 --replace 4206 347 --replace 5001 348 --replace 5002 349
+
+#To binarize each respective lobe from above
+
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/lh_frontal_white_matter.mgz --match 340
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/lh_occipital_white_matter.mgz --match 341
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/lh_temporal_white_matter.mgz --match 342
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/lh_parietal_white_matter.mgz --match 343
+
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/rh_frontal_white_matter.mgz --match 344
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/rh_occipital_white_matter.mgz --match 345
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/rh_temporal_white_matter.mgz --match 346
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/rh_parietal_white_matter.mgz --match 347
+
+#To binarize cortical segmentation (Values 332-339) from aparc+aseg.mgz segmentation
+
+mri_binarize --i $path_to_recon/$subj/mri/aparc+aseg.mgz --o $path_to_output/$subj/cortex_lobes.mgz --replace 1028 332 --replace 1027 332 --replace 1003 332 --replace 1018 332 --replace 1020 332 --replace 1019 332 --replace 1012 332 --replace 1014 332 --replace 1024 332 --replace 1017 332 --replace 1032 332 --replace 1026 332 --replace 1002 332 --replace 2028 333 --replace 2027 333 --replace 2003 333 --replace 2018 333 --replace 2020 333 --replace 2019 333 --replace 2012 333 --replace 2014 333 --replace 2024 333 --replace 2017 333 --replace 2032 333 --replace 2026 333 --replace 2002 333 --replace 1029 334 --replace 1008 334 --replace 1031 334 --replace 1022 334 --replace 1025 334 --replace 1023 334 --replace 1010 334 --replace 2029 335 --replace 2008 335 --replace 2031 335 --replace 2022 335 --replace 2025 335 --replace 2023 335 --replace 2010 335 --replace 1030 336 --replace 1015 336 --replace 1009 336 --replace 1007 336 --replace 1034 336 --replace 1006 336 --replace 1033 336 --replace 1016 336 --replace 2030 337 --replace 2015 337 --replace 2009 337 --replace 2007 337 --replace 2034 337 --replace 2006 337 --replace 2033 337 --replace 2016 337 --replace 1011 338 --replace 1013 338 --replace 1005 338 --replace 1021 338 --replace 2011 339 --replace 2013 339 --replace 2005 339 --replace 2021 339
+
+#To binarize each respective lobe from above
+
+mri_binarize --i $path_to_output/$subj/cortex_lobes.mgz --o $path_to_output/$subj/lh_frontal_cortex.mgz --match 332
+mri_binarize --i $path_to_output/$subj/cortex_lobes.mgz --o $path_to_output/$subj/rh_frontal_cortex.mgz --match 333
+
+mri_binarize --i $path_to_output/$subj/cortex_lobes.mgz --o $path_to_output/$subj/lh_parietal_cortex.mgz --match 334
+mri_binarize --i $path_to_output/$subj/cortex_lobes.mgz --o $path_to_output/$subj/rh_parietal_cortex.mgz --match 335
+
+mri_binarize --i $path_to_output/$subj/cortex_lobes.mgz --o $path_to_output/$subj/lh_temporal_cortex.mgz --match 336
+mri_binarize --i $path_to_output/$subj/cortex_lobes.mgz --o $path_to_output/$subj/rh_temporal_cortex.mgz --match 337
+
+mri_binarize --i $path_to_output/$subj/cortex_lobes.mgz --o $path_to_output/$subj/lh_occipital_cortex.mgz --match 338
+mri_binarize --i $path_to_output/$subj/cortex_lobes.mgz --o $path_to_output/$subj/rh_occipital_cortex.mgz --match 339
+
+
+#Converting and resampling lobe files to be register to lesion mask- this to be done for all the lobes
+## Cortex
+for lobe in frontal parietal temporal occipital; do
+
+for hemi in rh lh; do
+
+mri_convert -rl $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz $path_to_output/$subj/$hemi"_"$lobe"_cortex.mgz" $path_to_output/$subj/$hemi"_"$lobe"_cortex_resampled.nii"
+
+mri_binarize --i $path_to_output/$subj/$hemi"_"$lobe"_cortex_resampled.nii" --min 0.000001 --o $path_to_output/$subj/$hemi"_"$lobe"_cortex_resampled_bin.nii"
+
+fslmaths $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz -mas $path_to_output/$subj/$hemi"_"$lobe"_cortex_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_cortex_lesions.nii"
+##previously "frontal" instead of $lobe in the last line
+
+##WM 
+mri_convert -rl  $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz $path_to_output/$subj/$hemi"_"$lobe"_white_matter.mgz" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled.nii"
+
+mri_binarize --i $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled.nii" --min 0.000001 --o $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled_bin.nii"
+
+fslmaths $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz -mas $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_lesions.nii"
+
+
+done
+done
+
+# Binarize the different type lesion
+
+mri_binarize --i $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz --match 1 --o $path_to_output/$subj/WM_lesion_mask.nii
+mri_binarize --i $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz --match 2 --o $path_to_output/$subj/LC_lesion_mask.nii
+mri_binarize --i $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz --match 3 --o $path_to_output/$subj/CL_lesion_mask.nii
+
+
+
+# Substracting the lobe volume from the combined lesion mask (needs to be done for all the lobes and all the lesion masks, i.e. WM, LC, CL).
+
+for lobe in frontal parietal temporal occipital; do
+for hemi in rh lh; do
+echo "Cortex" >> $path_to_output/$lobe".csv"
+echo $hemi >> $path_to_output/$lobe".csv"
+
+fslmaths $path_to_output/$subj/WM_lesion_mask.nii -mas $path_to_output/$subj/$hemi"_"$lobe"_cortex_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_cortex_WM_lesions.nii"
+fslmaths $path_to_output/$subj/LC_lesion_mask.nii -mas $path_to_output/$subj/$hemi"_"$lobe"_cortex_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_cortex_LC_lesions.nii"
+fslmaths $path_to_output/$subj/CL_lesion_mask.nii -mas $path_to_output/$subj/$hemi"_"$lobe"_cortex_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_cortex_CL_lesions.nii"
+
+# Calculating the lesion load per extracted lobe lesion mask
+
+echo "WML" >> $path_to_output/$lobe".csv"
+fslstats $path_to_output/$subj/$hemi"_"$lobe"_cortex_WM_lesions.nii" -V >> $path_to_output/$lobe".csv"
+echo "LC" >> $path_to_output/$lobe".csv"
+fslstats $path_to_output/$subj/$hemi"_"$lobe"_cortex_LC_lesions.nii" -V >> $path_to_output/$lobe".csv"
+echo "CL" >> $path_to_output/$lobe".csv"
+fslstats $path_to_output/$subj/$hemi"_"$lobe"_cortex_CL_lesions.nii" -V >> $path_to_output/$lobe".csv"
+
+### WM ####
+echo "WM" >> $path_to_output/$lobe".csv"
+echo $hemi >> $path_to_output/$lobe".csv"
+
+fslmaths $path_to_output/$subj/WM_lesion_mask.nii -mas $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_WM_lesions.nii"
+fslmaths $path_to_output/$subj/LC_lesion_mask.nii -mas $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_LC_lesions.nii"
+fslmaths $path_to_output/$subj/CL_lesion_mask.nii -mas $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_CL_lesions.nii"
+
+# Calculating the lesion load per extracted lobe lesion mask
+
+echo "WML" >> $path_to_output/$lobe".csv"
+fslstats $path_to_output/$subj/$hemi"_"$lobe"_white_matter_WM_lesions.nii" -V >> $path_to_output/$lobe".csv"
+echo "LC" >> $path_to_output/$lobe".csv"
+fslstats $path_to_output/$subj/$hemi"_"$lobe"_white_matter_LC_lesions.nii" -V >> $path_to_output/$lobe".csv"
+echo "CL" >> $path_to_output/$lobe".csv"
+fslstats $path_to_output/$subj/$hemi"_"$lobe"_white_matter_CL_lesions.nii" -V >> $path_to_output/$lobe".csv"
+
+done
+done
+
+
+done # loop for all subjects
+ 
+FR MAPS
+
+#!/bin/bash
+
+#FR_maps
+
+path_to_mask=/autofs/space/alicudi_002/users/mscat/users/celine/lesion_mask
+path_to_FR_maps=/autofs/cluster/mscat/users/michael/FR_maps
+path_to_lobe=/autofs/cluster/mscat/users/michael/maps_nifti
+path_to_output=/autofs/cluster/mscat/users/michael/lobes
+
+echo '#' > $path_to_output/frontal.csv
+echo '#' > $path_to_output/occipital.csv
+echo '#' > $path_to_output/temporal.csv
+echo '#' > $path_to_output/parietal.csv
+echo '#' > $path_to_output/unsegmented_WM.csv
+
+for subj in DODMS10R_MS094_R01_25 MS73_R01_05 MS74_R01_06 MS76_R01_08 MS78_R01_10 MS80_R01_12 MS81_R01_13 MS084_R01_16_DODMS07 MS88_R01_20 MS89_R01_29 MS095_R01_26_DODMS12 MS069_R01_01_DODMS03_2 MS087_R01_19_DODMS17_2 MS079_R01_11 MS82_R01_14 MS86_R01_18 MS72_R01_04; do
+
+#DODMS10R_MS094_R01_25 MS73_R01_05 MS74_R01_06 MS76_R01_08 MS78_R01_10 MS80_R01_12 MS81_R01_13 MS084_R01_16_DODMS07 MS88_R01_20 MS89_R01_29 MS095_R01_26_DODMS12
+
+echo $subj 
+
+for lobe in frontal occipital temporal parietal unsegmented_WM; do
+
+echo $subj >> $path_to_output/$lobe".csv"
+
+mkdir $path_to_output/$subj
+
+# Subtracting Lesion mask from FR maps
+
+mri_binarize --i $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz --o $path_to_mask/$subj/combined-magn_WM.LC.CL_bin.nii.gz --replace 2 1 --replace 3 1
+
+mri_convert -rl $path_to_FR_maps/$subj/$subj"_FR_FSREG.nii" $path_to_mask/$subj/combined-magn_WM.LC.CL_bin.nii.gz $path_to_mask/$subj/rs_combined-magn_WM.LC.CL_bin.nii.gz
+
+
+#echo $path_to_FR_maps/$subj/$subj"_FR_FSREG.nii"
+
+fslmaths $path_to_FR_maps/$subj/$subj"_FR_FSREG.nii" -sub $path_to_mask/$subj/rs_combined-magn_WM.LC.CL_bin.nii.gz $path_to_output/$subj/FR_map_no_lesions.nii.gz
+
+
+
+#Masking lobe volume from FR maps
+
+for hemi in rh lh; do
+
+mri_convert -rl $path_to_output/$subj/FR_map_no_lesions.nii.gz $path_to_lobe/$subj/$hemi"_"$lobe"_white_matter.mgz" $path_to_output/$subj/$hemi"_"$lobe"_rs_FR_map_no_lesions.nii"
+
+
+fslmaths $path_to_output/$subj/FR_map_no_lesions.nii.gz -mas $path_to_output/$subj/$hemi"_"$lobe"_rs_FR_map_no_lesions.nii" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_FR_lobes.nii"
+
+
+# Calculating the FR load per extracted lobe lesion mask
+echo $hemi >> $path_to_output/$lobe".csv"
+fslstats $path_to_output/$subj/$hemi"_"$lobe"_white_matter_FR_lobes.nii" -M >> $path_to_output/$lobe".csv"
+
+
+done #loop hemisphere
+done # loop lobe
+done # loop for all subjects  
+UNSEGMENTED WHITE MATTER
+
+#!/bin/bash
+
+path_to_recon=/autofs/cluster/mscat/users/caterina/recons_fsv5.3/
+path_to_mask=/autofs/space/alicudi_002/users/mscat/users/celine/lesion_mask
+path_to_output=/autofs/cluster/mscat/users/michael
+
+echo '#' > $path_to_output/unsegmented_WM.csv
+
+for subj in MS90_R01_21 MS92_R01_23 MS96_R01_27 MS98_R01_30 MS102_R01_34 MS104_R01_36 MSPET05 MS_UHF_006 MS_UHF_018 MS_UHF_023 MS_UHF_024 MS_UHF_025 MS_UHF_028 MS_UHF_030 MS_UHF_033 NIMMS03 NIMMS05 NIMMS06 NIMMS07 NIMMS08 NIMMS10; do
+
+echo $subj 
+
+for lobe in unsegmented_WM;do
+
+echo $subj >> $path_to_output/$lobe".csv"
+
+
+done
+
+
+
+
+#To binarize the unsegmented white matter lobes with values 348-349
+
+mri_binarize --i $path_to_output/$subj/wmparc.lobes.mgz --o $path_to_output/$subj/white_matter_lobes.mgz --replace 5001 348 --replace 5002 349
+
+
+#To binarize each respective lobe from above
+
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/lh_unsegmented_WM_white_matter.mgz --match 348
+mri_binarize --i $path_to_output/$subj/white_matter_lobes.mgz --o $path_to_output/$subj/rh_unsegmented_WM_white_matter.mgz --match 349
+
+#Converting and resampling lobe files to be register to lesion mask- this to be done for all the lobes
+
+for lobe in unsegmented_WM; do
+
+for hemi in rh lh; do
+
+##WM 
+mri_convert -rl  $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz $path_to_output/$subj/$hemi"_"$lobe"_white_matter.mgz" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled.nii"
+
+mri_binarize --i $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled.nii" --min 0.000001 --o $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled_bin.nii"
+
+fslmaths $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz -mas $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_lesions.nii"
+
+done
+done
+
+# Substracting the lobe volume from the combined lesion mask (needs to be done for all the lobes and all the lesion masks, i.e. WM, LC, CL).
+
+for lobe in unsegmented_WM; do
+for hemi in rh lh; do
+
+echo "WM" >> $path_to_output/$lobe".csv"
+echo $hemi >> $path_to_output/$lobe".csv"
+
+fslmaths $path_to_output/$subj/WM_lesion_mask.nii -mas $path_to_output/$subj/$hemi"_"$lobe"_white_matter_resampled_bin.nii" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_WM_lesions.nii"
+
+# Calculating the lesion load per extracted lobe lesion mask
+
+echo "WML" >> $path_to_output/$lobe".csv"
+fslstats $path_to_output/$subj/$hemi"_"$lobe"_white_matter_WM_lesions.nii" -V >> $path_to_output/$lobe".csv"
+
+done
+done
+
+
+done # loop for all subjects
+
+done # loop for all subjects
+
