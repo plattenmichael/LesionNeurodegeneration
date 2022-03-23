@@ -147,64 +147,7 @@ done
 
 done # loop for all subjects
  
-FR MAPS
-
-#!/bin/bash
-
-#FR_maps
-
-path_to_mask=[path to mask]
-path_to_FR_maps=[path to FR maps]
-path_to_lobe=[path to lobe segmentation]
-path_to_output=[path to output]
-
-echo '#' > $path_to_output/frontal.csv
-echo '#' > $path_to_output/occipital.csv
-echo '#' > $path_to_output/temporal.csv
-echo '#' > $path_to_output/parietal.csv
-echo '#' > $path_to_output/unsegmented_WM.csv
-
-for subj in [list of subjects]; do
-
-echo $subj 
-
-for lobe in frontal occipital temporal parietal unsegmented_WM; do
-
-echo $subj >> $path_to_output/$lobe".csv"
-
-mkdir $path_to_output/$subj
-
-# Subtracting Lesion mask from FR maps
-
-mri_binarize --i $path_to_mask/$subj/combined-magn_WM.LC.CL.nii.gz --o $path_to_mask/$subj/combined-magn_WM.LC.CL_bin.nii.gz --replace 2 1 --replace 3 1
-
-mri_convert -rl $path_to_FR_maps/$subj/$subj"_FR_FSREG.nii" $path_to_mask/$subj/combined-magn_WM.LC.CL_bin.nii.gz $path_to_mask/$subj/rs_combined-magn_WM.LC.CL_bin.nii.gz
-
-
-#echo $path_to_FR_maps/$subj/$subj"_FR_FSREG.nii"
-
-fslmaths $path_to_FR_maps/$subj/$subj"_FR_FSREG.nii" -sub $path_to_mask/$subj/rs_combined-magn_WM.LC.CL_bin.nii.gz $path_to_output/$subj/FR_map_no_lesions.nii.gz
-
-
-
-#Masking lobe volume from FR maps
-
-for hemi in rh lh; do
-
-mri_convert -rl $path_to_output/$subj/FR_map_no_lesions.nii.gz $path_to_lobe/$subj/$hemi"_"$lobe"_white_matter.mgz" $path_to_output/$subj/$hemi"_"$lobe"_rs_FR_map_no_lesions.nii"
-
-
-fslmaths $path_to_output/$subj/FR_map_no_lesions.nii.gz -mas $path_to_output/$subj/$hemi"_"$lobe"_rs_FR_map_no_lesions.nii" $path_to_output/$subj/$hemi"_"$lobe"_white_matter_FR_lobes.nii"
-
-
-# Calculating the FR load per extracted lobe lesion mask
-echo $hemi >> $path_to_output/$lobe".csv"
-fslstats $path_to_output/$subj/$hemi"_"$lobe"_white_matter_FR_lobes.nii" -M >> $path_to_output/$lobe".csv"
-
-
-done #loop hemisphere
-done # loop lobe
-done # loop for all subjects  
+ 
 UNSEGMENTED WHITE MATTER
 
 #!/bin/bash
